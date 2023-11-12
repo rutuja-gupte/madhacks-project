@@ -202,6 +202,7 @@ public class AStarGraph extends AStarNode {
     
     // pixel is destination
     if (isFinalDestination(source, destination)) {
+      System.out.println("You are at the Destination!");
       return;
     }
     
