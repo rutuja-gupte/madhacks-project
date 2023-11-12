@@ -12,8 +12,8 @@ public class XandYCoordinates {
   
   @Override
   public boolean equals(Object object) {
-    if (object instanceof XandYCoordinates)
-      if (this.X == ((XandYCoordinates) object).X && this.Y == ((XandYCoordinates) object).Y)
+    if (object instanceof Asterist.XandYCoordinates)
+      if (this.X == ((Asterist.XandYCoordinates) object).X && this.Y == ((Asterist.XandYCoordinates) object).Y)
         return true;
     return false;
   }

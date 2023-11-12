@@ -1,5 +1,7 @@
 package Asterist;
 
+import edu.princeton.cs.introcs.GrayscalePicture;
+
 import java.util.PriorityQueue;
 import java.util.Stack;
 public class AStarGraph extends AStarNode {
@@ -15,7 +17,7 @@ public class AStarGraph extends AStarNode {
     
     do {
       path.push(new XandYCoordinates(Xcoordinate, Ycoordinate));
-      nextNode = currentNode[Xcoordinate][Ycoordinate];
+      nextNode = currentNode[Xcoordinate][Ycoordinate].previous;
       Xcoordinate = nextNode.X;
       Ycoordinate = nextNode.Y;
     }
@@ -24,77 +26,110 @@ public class AStarGraph extends AStarNode {
     while (!path.empty()) {
       XandYCoordinates point = path.peek();
       path.pop();
-      System.out.println("(" + point.X + "," + point.Y + ") ");
+      System.out.print("(" + point.X + "," + point.Y + "), ");
     }
   }
   
   public void searchPath(double[][] data, XandYCoordinates source, XandYCoordinates destination) {
+    // invalid node
     if (!validNode(data, source)) {
       System.out.println("Invalid source point.");
       return;
     }
     
+    // invalid destination
     if (!validNode(data, destination)) {
       System.out.println("Invalid destination point.");
+      return;
     }
     
+    // isolated source
+    if(!isPixelWhite(data, source)){
+      System.out.println("It is a blocked source");
+      return;
+    }
+    
+    
+    // isolated destination
+    else if(!isPixelWhite(data, destination)){
+      System.out.println("It is a blocked destination.");
+      return;
+    }
+    
+    // pixel is destination
     if (isFinalDestination(source, destination)) {
       System.out.println("This is the destination.");
     }
     
+    // else, check neighbours
     boolean[][] visitedArray = new boolean[data.length][data[0].length];
-    AStarNode[][] currentNode = new AStarNode[data.length][data[0].length];
+    AStarNode[][] runner = new AStarNode[data.length][data[0].length];
     
+    // initializing X and Y
     int i = source.X;
     int j = source.Y;
-    currentNode[i][j] = new AStarNode(new XandYCoordinates(i, j), 0.0, 0.0, 0.0);
+    runner[i][j] = new AStarNode(new XandYCoordinates(i, j), 0.0, 0.0, 0.0);
     
-    PriorityQueue<ValueInformation> toBeVisitedList = new PriorityQueue<>((number1, number2) -> Math.round((int) (number1.value - number2.value)));
+    // add each neighbouring edge to a priority queue
+    PriorityQueue<ValueInformation> toBeVisitedList = new PriorityQueue<>((number1, number2) ->
+        (int) Math.round((number1.value - number2.value)));
     
+    toBeVisitedList.add(new ValueInformation(0.0, i, j));
+    
+    
+    // while priority queue has nodes
     while (!toBeVisitedList.isEmpty()) {
       ValueInformation pointInformation = toBeVisitedList.peek();
-      i = pointInformation.i;
-      j = pointInformation.j;
+      int x = pointInformation.i;
+      int y = pointInformation.j;
       
+      // remove head
       toBeVisitedList.poll();
-      visitedArray[i][j] = true;
+      visitedArray[x][y] = true;
       
-      for (int x = -1; x <= 1; x++) {
-        for (int y = -1; y <= 1; y++) {
-          if (Math.abs(x) == Math.abs(y)) {
-            continue;
-          }
-          XandYCoordinates neighbour = new XandYCoordinates(x + i, y + j);
+      // Loop to go through the neighbours that are on the four directions
+      for (int xNeigh = -1; xNeigh <= 1; xNeigh++) {
+        for (int yNeigh = -1; yNeigh <= 1; yNeigh++) {
+          
+          // Getting the neighbour coordinates
+          XandYCoordinates neighbour = new XandYCoordinates(xNeigh + x, yNeigh + y);
+          
+          // Checking if the neighbour is valid in accordance with the data
           if (validNode(data, neighbour)) {
-            if (currentNode[neighbour.X] == null) {
-              currentNode[neighbour.X] = new AStarNode[data[0].length];
-            } else if (currentNode[neighbour.X][neighbour.Y] == null) {
-              currentNode[neighbour.X][neighbour.Y] = new AStarNode();
-            } else if (isFinalDestination(neighbour, destination)) {
-              currentNode[neighbour.X][neighbour.Y].previous = new XandYCoordinates(i, j);
+            // if the currentNode
+            if (runner[neighbour.X] == null) {
+              runner[neighbour.X] = new AStarNode[data[0].length];
+            }
+            if (runner[neighbour.X][neighbour.Y] == null) {
+              runner[neighbour.X][neighbour.Y] = new AStarNode();
+            }
+            
+            if (isFinalDestination(neighbour, destination)) {
+              runner[neighbour.X][neighbour.Y].previous = new XandYCoordinates(x, y);
               System.out.println("Reached the destination");
-              lookPath(currentNode, destination);
+              lookPath(runner, destination);
               return;
-            } else if (!visitedArray[neighbour.X][neighbour.Y]) {
-              if (validNode(data, neighbour)) {
-                double newFinalValue = currentNode[i][j].cost + 1.0 + calculateHeuristic(neighbour, destination);
+            } else if (!visitedArray[neighbour.X][neighbour.Y] &&
+                isPixelWhite(data, neighbour)) {
+              double costNew = runner[x][y].cost + 1.0;
+              double newHeuristic = calculateHeuristic(neighbour, destination);
+              double newFinalValue = costNew + newHeuristic;
+              
+              if (runner[neighbour.X][neighbour.Y].finalValue == -1
+                  || runner[neighbour.X][neighbour.Y].finalValue > newFinalValue) {
                 
-                if (currentNode[neighbour.X][neighbour.Y].finalValue == -1
-                    || currentNode[neighbour.X][neighbour.Y].finalValue > newFinalValue) {
-                  
-                  toBeVisitedList.add(new ValueInformation(newFinalValue, neighbour.X, neighbour.Y));
-                  
-                  currentNode[neighbour.X][neighbour.Y].cost = currentNode[i][j].cost + 1.0;
-                  currentNode[neighbour.X][neighbour.Y].finalValue = newFinalValue;
-                  currentNode[neighbour.X][neighbour.Y].previous = new XandYCoordinates(i, j);
-                }
+                toBeVisitedList.add(new ValueInformation(newFinalValue, neighbour.X, neighbour.Y));
+                
+                runner[neighbour.X][neighbour.Y].cost = costNew;
+                runner[neighbour.X][neighbour.Y].finalValue = newFinalValue;
+                runner[neighbour.X][neighbour.Y].previous = new XandYCoordinates(x, y);
               }
             }
           }
         }
       }
     }
-    System.out.println("Failed to find the Destination Cell");
+    System.out.println("Failed to find the Destination");
   }
   
   public static void main(String[] args) {
@@ -103,22 +138,26 @@ public class AStarGraph extends AStarNode {
     //0: The cell is blocked
     // 255: The cell is not blocked
     
-    double[][] grid = {
-        { 255,   0, 255, 255 },
-        { 255,   0, 255, 255 },
-        { 255, 255, 255, 255 },
-        { 255,   0, 255, 255 }
-    };
+    String filename = "tester1.jpeg";
     
+    GrayscalePicture source = new GrayscalePicture(filename);
+    
+    double[][] grid = new double[source.height()][source.width()];
+    
+    for(int i = 0; i < grid.length; i++){
+      for(int j = 0; j < grid[i].length; j++){
+        grid[i][j] = source.getGrayscale(j, i);
+      }
+    }
     
     // Start is the left-most upper-most corner
-    XandYCoordinates src = new XandYCoordinates(0,0);
+    XandYCoordinates src = new XandYCoordinates(200,400);
     //(8, 0);
     
     // Destination is the right-most bottom-most corner
-    XandYCoordinates dest = new XandYCoordinates(3, 3);
+    XandYCoordinates dest = new XandYCoordinates(500, 800);
     
-    AStarGraph app = new AStarGraph();
+    Asterist.AStarGraph app = new Asterist.AStarGraph();
     app.searchPath(grid, src, dest);
     
   }
