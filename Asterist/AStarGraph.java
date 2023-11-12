@@ -200,7 +200,7 @@ public class AStarGraph extends AStarNode {
     
     // pixel is destination
     if (isFinalDestination(source, destination)) {
-      System.out.println("You are at the Destination!");
+      System.out.println("You're at the Destination!");
       return;
     }
     
@@ -233,6 +233,10 @@ public class AStarGraph extends AStarNode {
       // Loop to go through the neighbours that are on the four directions
       for (int xNeigh = -1; xNeigh <= 1; xNeigh++) {
         for (int yNeigh = -1; yNeigh <= 1; yNeigh++) {
+
+          if (Math.abs(xNeigh) == Mat.abs(yNeigh)) {
+            continue;
+          }
           
           // Getting the neighbour coordinates
           XandYCoordinates neighbour =
