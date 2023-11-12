@@ -1,4 +1,4 @@
-import flask # requires installation if not already installed - pip3 install flask
+import flask 
 import time
 
 import numpy as np
@@ -21,17 +21,13 @@ def find_num(string):
     return False
 
 
-subprocess.run(["java", "Main.java"], check=True, stdout=subprocess.PIPE).stdout
-
-
-
 @app.route('/')
 def home():
     with open("index.html") as f:
         html = f.read()
     return html
 
-# +
+
 @app.route('/map.html', methods=["POST", "GET"])
 def mapping():
     
@@ -50,17 +46,21 @@ def mapping():
         
         dst1 = df.loc[dst]['top']
         dst2 = df.loc[dst]['left']
-        
-#         return_string = subprocess.run(["java", "Main.java"], check=True, stdout=subprocess.PIPE).stdout
-#         return return_string
-        return "TODO"
+        fname = table + ".jpg"
+
+        return_string = subprocess.run(['java', '-cp', '.:AStar.jar:stdlib-package.jar', 'Asterist.AStarGraph', fname, src1, src2, dst1, dst2], check=True, stdout=subprocess.PIPE).stdout
+        return return_string
+       
     with open("map.html") as f:
         html = f.read()
     
     return html
 
-
-# -
+@app.route('/floorplan_add.html', methods=["POST"])
+def add():
+    if flask.request.method == 'POST':
+        bldg_img = flask.request.form['image']
+        bldg_name = flask.request.form['text']
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, threaded=False)
