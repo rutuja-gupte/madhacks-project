@@ -3,6 +3,8 @@ import time
 
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import re
 from PIL import Image 
@@ -90,10 +92,11 @@ def mapping():
 
 #             path1 = subprocess.run(['java', '-cp', '.:AStar.jar:stdlib-package.jar', 'Asterist.AStarGraph', fname, src1, src2, dst1, dst2], check=True, stdout=subprocess.PIPE).stdout
 
-#             src1 = df.loc[stair]["top"]
-#             src2 = df.loc[stair]["left"]
-#             dst1 = df.loc[dst]["top"]
-#             dst2 = df.loc[dst]["left"]
+        src1 = str(int(df.loc[src]["top"])+50) 
+        src2 = str(int(df.loc[src]["left"])+50)
+        dst1 = str(int(df.loc[dst]["top"])-50)
+        dst2 = str(int(df.loc[dst]["left"])-50)
+        
 
 # #             change fname again
 
@@ -104,18 +107,29 @@ def mapping():
 #             dst2 = df.loc[dst]['left']
 #             fname = table + ".jpg"
 
-#             path = subprocess.run(['java', '-cp', '.:AStar.jar:stdlib-package.jar', 'Asterist.AStarGraph', fname, src2, src1, dst2, dst1], check=True, stdout=subprocess.PIPE).stdout
+        path = subprocess.run(['java', '-classpath', './', 'Asterist.AStarGraph', os.path.join('floorplans', table, fname), src1, src2, dst1, dst2], stdout=subprocess.PIPE).stdout
+        
+        path = str(path, encoding='utf-8')
+        outs = path.split("\n")
+        paths = outs[0]
+        directions = outs[1]
+        
+        with open("temp.txt", "w") as f:
+            f.write(paths)
+    
 #         return return_string # gotta change this
         with open('result.html') as f:
             data = f.read()
         data = data.replace('??', fname)
         data = data.replace('###', table)
+        data = data.replace('INSTRUCTIONS', directions)
         return data
     with open("map.html") as f:
         html = f.read()
     html = html.replace("BUTTONS1", rep)
     html = html.replace("BUTTONS2", rep)
     html = html.replace('????',table)
+
     return html
 
 @app.route('/dashboard.svg')
@@ -126,17 +140,33 @@ def dashboard():
     print(os.path.join('floorplans', dirs, fname))
     img = plt.imread(os.path.join('floorplans', dirs, fname))
 #     figure = plt.imshow(img)
+
+    with open("temp.txt") as f:
+        data = f.read()
+    l = re.findall('\(\d+,\d+\)', data)
+    l2 = [item[1:-1].split(',') for item in l]
+    l3 = [(int(item[0]), int(item[1])) for item in l2]
     
+    
+  
+    img_test_result = img.copy()[:,:]
+
+    for x,y in l3:
+        img_test_result[x,y] = 127
+        
     figure = plt.figure()
     axes = figure.add_subplot(111)
-    axes.imshow(img)
-  
-    #   img_test_result = img.copy()[:,:]
+    for i in l3:
+        p = plt.Circle(i, 10, color='red')
+        axes.add_patch(p)
+#     if len(l3) > 0:
+#         p1 = plt.Circle(l3[0], 10, color='red')
+#         p2 = plt.Circle(l3[-1], 10, color='red')
+#     axes.add_patch(p1)
+#     axes.add_patch(p2)
+    axes.imshow(img_test_result, cmap="viridis")
 
-#     for x,y in rough:
-#         img_test_result[x,y] = 127
-
-#     fig = plt.imshow(img_test_result)
+#     axes.imshow(img_test_result)
 #     return the plot by saving local copy
     with open("temp.png", "wb") as f:
         figure.savefig(f)
