@@ -2,6 +2,7 @@ package Asterist;
 
 import edu.princeton.cs.introcs.GrayscalePicture;
 
+import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.util.Stack;
 
@@ -47,7 +48,7 @@ public class AStarGraph extends AStarNode {
   }
   
   public void printPath(AStarNode[][] currentNode, XandYCoordinates destination) {
-    System.out.println("The Path: ");
+    String directions = "";
     Stack<XandYCoordinates> path = new Stack<>();
     
     int Xcoordinate = destination.height;
@@ -63,11 +64,89 @@ public class AStarGraph extends AStarNode {
     }
     while (currentNode[Xcoordinate][Ycoordinate].previous != nextNode);
     
+    String[] navigations = new String[path.size()];
+    int startCase = 1;
+    int numIterations = 0;
+    
     while (!path.empty()) {
-      XandYCoordinates point = path.peek();
+      XandYCoordinates currPoint = path.peek();
       path.pop();
-      System.out.print("(" + point.height + "," + point.width + "), ");
+      if (!path.empty()) {
+        XandYCoordinates nextPoint = path.peek();
+        
+        XandYCoordinates[] pathArr = new XandYCoordinates[path.size()];
+        path.copyInto(pathArr);
+        
+        navigations[numIterations] = directions(pathArr, nextPoint, currPoint);
+        
+        // for start node
+        while (startCase > 0) {
+          directions = "Face North and " + firstCase(currPoint, nextPoint);
+          startCase--;
+        }
+      }
+      
+      
+      System.out.print("(" + currPoint.height + "," + currPoint.width + "), ");
+      numIterations++;
     }
+    System.out.println();
+    System.out.println(Arrays.toString(navigations));
+  }
+  
+  private String firstCase(XandYCoordinates curr, XandYCoordinates next) {
+    
+    double angle =
+        Math.atan(((double) (next.height - curr.height)) / ((double) (next.width - curr.width)));
+    
+    angle = Math.toDegrees(angle);
+    
+    return getDirection((int) angle);
+  }
+  
+  private String directions(XandYCoordinates[] coordinatesStack, XandYCoordinates nextPoint,
+                            XandYCoordinates currPoint) {
+    double angle = 0;
+    
+    if (coordinatesStack.length >= 2) {
+      angle = calculateAngle(currPoint, nextPoint, coordinatesStack[1]);
+    }
+    
+    return getDirection((int)angle);
+  }
+  
+  private String getDirection(int angle) {
+    if (Math.abs(angle) >= 0 && Math.abs((int) angle) <= 10) {
+      return  "Head Straight";
+    }
+    else if (Math.abs((int) angle) >= 35 && Math.abs((int) angle) <= 55) {
+      if (angle >= 0.0) return "Move diagonally right!";
+      else return "Move diagonally left!";
+    }
+    else if (Math.abs((int) angle) >= 80 && Math.abs((int) angle) <= 100) {
+      if (angle >= 0.0) return  "Turn right!";
+      else return "Turn left!";
+    }
+    else {
+      return "Head Straight";
+    }
+  }
+  
+  private double calculateAngle(XandYCoordinates curr, XandYCoordinates next,
+                                XandYCoordinates nextNext) {
+    double[] vecA = {next.width - curr.width, next.height - curr.height};
+    double[] vecB = {nextNext.width - next.width, nextNext.height - next.height};
+    
+    double dotProduct = (vecA[0] * vecB[0]) + (vecA[1] * vecB[1]);
+    double magA =
+        Math.sqrt(Math.pow(vecA[0], 2) + Math.pow(vecA[1], 2));
+    double magB =
+        Math.sqrt(Math.pow(vecB[0], 2) + Math.pow(vecB[1], 2));
+    
+    
+    double alpha = Math.acos(dotProduct/(magA * magB));
+    
+    return Math.round(Math.toDegrees(alpha));
   }
   
   public void searchPath(double[][] data, XandYCoordinates source, XandYCoordinates destination) {
@@ -98,7 +177,7 @@ public class AStarGraph extends AStarNode {
     
     // pixel is destination
     if (isFinalDestination(source, destination)) {
-      System.out.println("This is the destination.");
+      return;
     }
     
     // else, check neighbours
@@ -148,7 +227,6 @@ public class AStarGraph extends AStarNode {
             if (isFinalDestination(neighbour, destination)) {
               runner[neighbour.height][neighbour.width].previous =
                   new XandYCoordinates(pointHeight, pointWidth);
-              System.out.println("Reached the destination");
               printPath(runner, destination);
               return;
             }
@@ -177,3 +255,4 @@ public class AStarGraph extends AStarNode {
     System.out.println("Failed to find the Destination");
   }
 }
+
