@@ -1,15 +1,29 @@
 import java.util.*;
 import java.io.*;
 public class ReadCSV {
-  static double[][] csvArray = new double[1000][1500];
+
+  static double[][] csvArray;
 
   public double[][] readFile(String file) {
-
+    
     try {
       File testFile = new File(file);
       Scanner scanner = new Scanner(testFile);
+      
+      int numRows = 0;
+      while (scanner.hasNextLine()) {
+        numRows++;
+	scanner.nextLine();
+      }
+      scanner.close();
+      
+      scanner = new Scanner(testFile);	
 
-      scanner.useDelimiter(",");
+      int numCols = scanner.nextLine().split(",").length;
+      scanner.close();
+
+      csvArray = new double[numRows][numCols];
+      scanner = new Scanner(testFile);
 
       int lineNum = 0;
       while (scanner.hasNextLine()) {
