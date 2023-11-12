@@ -122,6 +122,7 @@ def mapping():
             data = f.read()
         data = data.replace('??', fname)
         data = data.replace('###', table)
+#         data = data.replace('INSTRUCTIONS', path)
         data = data.replace('INSTRUCTIONS', directions)
         return data
     with open("map.html") as f:
