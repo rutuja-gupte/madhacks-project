@@ -6,8 +6,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import re
 from PIL import Image 
-from pytesseract import pytesseract 
 import os
+import sqlite3
 
 import numpy as np 
 from PIL import Image as im 
@@ -15,23 +15,14 @@ from PIL import Image as im
 app = flask.Flask("my application")
 
 def find_num(string):
-            if len(re.findall(r'\d', string)) > 0:
-                return True
-            return False
+    if len(re.findall(r'\d', string)) > 0:
+          return True
+    return False
 
+conn = sqlite3.connect("database.db")
 
-image_path = os.path.join("C:\\", "My Data", "Academics", "Madhacks23", "madhacks-project", "image.jpg")
-path_to_tesseract = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-img = Image.open(image_path, 'r') 
-pytesseract.tesseract_cmd = path_to_tesseract 
-data = pytesseract.image_to_data(image_path)
-img.close()
-weird_string = re.findall("([\s\S]*)\n$", data)
-l = [line.split('\t') for line in weird_string[0].split('\n')]
-df = pd.DataFrame(l[1:], columns = l[0])
-filtered_df = df[(df['text'] != '') & (df['conf'].astype(float) > 95)]
-final_df = filtered_df[filtered_df['text'].apply(find_num)][['left', 'top', 'text']]
-
+def query(string):
+    return pd.read_sql(string, conn)
 
 @app.route('/')
 def home():
@@ -41,9 +32,18 @@ def home():
 
 @app.route('/map.html')
 def mapping():
+    with open("map.html") as f:
+        html = f.read()
+        
     query_string = dict(flask.request.args)
-    if query_string['building'] == 'aghall':
-        return "TODO"
+    table = query_string['building']
+    query_str = f'select * from {table}'
+    df = query(query_str)
+    if flask.request.method == 'POST':
+        src = flask.request.form['src']
+        dst = flask.request.form['dst']
+        
+    return html
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, threaded=False)
