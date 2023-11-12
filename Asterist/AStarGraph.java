@@ -139,39 +139,37 @@ public class AStarGraph extends AStarNode {
     }
   }
 
+  private double calculateAngle(XandYCoordinates curr, XandYCoordinates next,
+                                XandYCoordinates nextNext) {
+    double[] vecA = {next.width - curr.width, next.height - curr.height};
+    double[] vecB = {nextNext.width - next.width, nextNext.height - next.height};
+
+    double dotProduct = (vecA[0] * vecB[0]) + (vecA[1] * vecB[1]);
+
+    double magA = Math.hypot(vecA[0], vecA[1]);
+    double magB = Math.hypot(vecB[0], vecB[1]);
+
+    double alpha = Math.acos(dotProduct / (magA * magB));
+
+    return Math.round(Math.toDegrees(alpha));
+  }
+  
 //  private double calculateAngle(XandYCoordinates curr, XandYCoordinates next,
 //                                XandYCoordinates nextNext) {
-//    double[] vecA = {next.width - curr.width, next.height - curr.height};
-//    double[] vecB = {nextNext.width - next.width, nextNext.height - next.height};
+////    double[] vecA = {next.width - curr.width, next.height - curr.height};
+////    double[] vecB = {nextNext.width - next.width, nextNext.height - next.height};
+//
+//    double[] vecA = {curr.width, curr.height};
+//    double[] vecB = {next.width, next.height};
 //
 //    double dotProduct = (vecA[0] * vecB[0]) + (vecA[1] * vecB[1]);
-//    double magA =
-//        Math.sqrt(Math.pow(vecA[0], 2) + Math.pow(vecA[1], 2));
-//    double magB =
-//        Math.sqrt(Math.pow(vecB[0], 2) + Math.pow(vecB[1], 2));
-//
+//    double magA = Math.hypot(vecA[0], vecA[1]);
+//    double magB = Math.hypot(vecB[0], vecB[1]);
 //
 //    double alpha = Math.acos(dotProduct / (magA * magB));
 //
-//    return Math.round(Math.toDegrees(alpha));
+//    return Math.toDegrees(alpha);
 //  }
-  
-  private double calculateAngle(XandYCoordinates curr, XandYCoordinates next,
-                                XandYCoordinates nextNext) {
-//    double[] vecA = {next.width - curr.width, next.height - curr.height};
-//    double[] vecB = {nextNext.width - next.width, nextNext.height - next.height};
-    
-    double[] vecA = {curr.width, curr.height};
-    double[] vecB = {next.width, next.height};
-    
-    double dotProduct = (vecA[0] * vecB[0]) + (vecA[1] * vecB[1]);
-    double magA = Math.hypot(vecA[0], vecA[1]);
-    double magB = Math.hypot(vecB[0], vecB[1]);
-    
-    double alpha = Math.acos(dotProduct / (magA * magB));
-    
-    return Math.toDegrees(alpha);
-  }
   
   
   public void searchPath(double[][] data, XandYCoordinates source, XandYCoordinates destination) {
