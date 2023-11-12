@@ -26,8 +26,8 @@ public class AStarNode {
   
   public boolean validNode(double[][] data, XandYCoordinates node){
     if(data.length > 0 && data[0].length > 0){
-      if(node.X >= 0 && node.X < data.length){
-        if(node.Y >= 0 && node.Y < data[0].length)
+      if(node.height >= 0 && node.height < data.length){
+        if(node.width >= 0 && node.width < data[0].length)
           return true;
       }
     }
@@ -36,7 +36,7 @@ public class AStarNode {
   
   public boolean isPixelWhite(double[][] data, XandYCoordinates node){
     if(validNode(data, node)){
-      if(data[node.X][node.Y] == 255){
+      if(data[node.height][node.width] == 255){
         return true;
       }
     }
@@ -49,8 +49,8 @@ public class AStarNode {
   
   public double calculateHeuristic(XandYCoordinates source, XandYCoordinates destination){
     double heuristic;
-    double intermediate1 = Math.pow((source.X - destination.X), 2);
-    double intermediate2 = Math.pow((source.Y - destination.Y), 2);
+    double intermediate1 = Math.pow((source.height - destination.height), 2);
+    double intermediate2 = Math.pow((source.width - destination.width), 2);
     heuristic = Math.sqrt(intermediate1 + intermediate2);
     return heuristic;
   }
