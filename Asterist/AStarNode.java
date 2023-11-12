@@ -1,5 +1,4 @@
 package Asterist;
-
 public class AStarNode {
   
   public XandYCoordinates previous;

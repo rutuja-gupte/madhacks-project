@@ -2,8 +2,8 @@ package Asterist;
 
 public class XandYCoordinates {
   
-  int height; // height coordinate of the image
-  int width; // width coordinate of the image
+  public int height; // height coordinate of the image
+  public int width; // width coordinate of the image
   
   public XandYCoordinates(int height, int width) {
     this.height = height;
