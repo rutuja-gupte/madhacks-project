@@ -234,7 +234,7 @@ public class AStarGraph extends AStarNode {
       for (int xNeigh = -1; xNeigh <= 1; xNeigh++) {
         for (int yNeigh = -1; yNeigh <= 1; yNeigh++) {
 
-          if (Math.abs(xNeigh) == Mat.abs(yNeigh)) {
+          if (Math.abs(xNeigh) == Math.abs(yNeigh)) {
             continue;
           }
           
