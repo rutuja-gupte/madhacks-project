@@ -1,5 +1,6 @@
-import java.util.*;
-import java.io.*;
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
 public class ReadCSV {
 
   static double[][] csvArray;
