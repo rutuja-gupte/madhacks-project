@@ -112,11 +112,11 @@ def mapping():
     if flask.request.method == 'POST':
         src = flask.request.form['src2']
         dst = flask.request.form['dst2']
-        
+
 #         src_floor = -1
 #         dst_floor = -1
 #         stair = ""
-        
+
         src_floor = df.loc[src]['floor']
         dst_floor = df.loc[dst]['floor']
         
@@ -124,8 +124,8 @@ def mapping():
             return "Not on the same floor"
         
         fname = table+"_"+src_floor+".jpg"
-        
-        
+
+
 #         return src_floor + dst_floor
 #         for row, idx in df.iterrows():
 #             if src == df.loc[row]["text"]:
@@ -156,7 +156,7 @@ def mapping():
         src2 = str(int(df.loc[src]["left"]))
         dst1 = str(int(df.loc[dst]["top"]))
         dst2 = str(int(df.loc[dst]["left"]))
-        
+
 
 # #             change fname again
 
@@ -167,24 +167,24 @@ def mapping():
 #             dst2 = df.loc[dst]['left']
 #             fname = table + ".jpg"
 
-        path = subprocess.run(['java', '-classpath', './', 'Asterist.AStarGraph', os.path.join('floorplans', table, fname), src1, src2, dst1, dst2], stdout=subprocess.PIPE).stdout
-        
-        path = str(path, encoding='utf-8')
-        outs = path.split("\n")
+#         path = subprocess.run(['java', '-classpath', './', 'Asterist.AStarGraph', os.path.join('floorplans', table, fname), src1, src2, dst1, dst2], stdout=subprocess.PIPE).stdout
+
+#         path = str(path, encoding='utf-8')
+#         outs = path.split("\n")
 #         paths = outs[0]
 #         directions = outs[1]
 
 ######working
         img = plt.imread(os.path.join('floorplans', table, fname))
-#         paths = astar(img[:,:], (int(src1), int(src2)), (int(dst1), int(dst2)))
-#         with open("temp.json", "w") as f:
-#             json.dump(paths, f)
+        paths = astar(img[:,:,0], (int(src1), int(src2)), (int(dst1), int(dst2)))
+        with open("temp.json", "w") as f:
+            json.dump(paths, f)
        #### end of working     
             
                   
-        with open("temp.txt", "w") as f:
-            f.write(path)
-    
+#         with open("temp.txt", "w") as f:
+#             f.write(path)
+
 #         return return_string # gotta change this
 
 ####working
@@ -192,7 +192,7 @@ def mapping():
             data = f.read()
         data = data.replace('??', fname)
         data = data.replace('###', table)
-        data = data.replace('INSTRUCTIONS', path)
+#         data = data.replace('INSTRUCTIONS', paths)
 #         data = data.replace('INSTRUCTIONS', directions)
         return data
     with open("map.html") as f:
@@ -212,24 +212,24 @@ def dashboard():
     img = plt.imread(os.path.join('floorplans', dirs, fname))
 #     figure = plt.imshow(img)
 
-    with open("temp.txt") as f:
-        data = f.read()
-    l = re.findall('\(\d+,\d+\)', data)
-    l2 = [item[1:-1].split(',') for item in l]
-    l3 = [(int(item[0]), int(item[1])) for item in l2]
+#     with open("temp.txt") as f:
+#         data = f.read()
+#     l = re.findall('\(\d+,\d+\)', data)
+#     l2 = [item[1:-1].split(',') for item in l]
+#     l3 = [(int(item[0]), int(item[1])) for item in l2]
 
 ### Working code
     with open("temp.json") as f:
         l3 = json.load(f)    
     print(l3)
 ### Idk working code    
-    
-    
+
+
 #     img_test_result = img.copy()
 
 #     for x,y in l3:
 #         img_test_result[x,y] = 127
-        
+
 ### Working code
     figure = plt.figure()
     axes = figure.add_subplot(111)
@@ -247,11 +247,11 @@ def dashboard():
     img5 = np.zeros((img.shape[0], img.shape[1], 3))
     for x in range(img.shape[0]):
         for y in range(img.shape[1]):
-            img5[x,y] = np.array([img[x,y], 255, 255])
+            img5[x,y] = np.array([img[x,y,0], 0, 255])
 
     for x,y in l3:
         img5[x,y] = np.array([0, 0, 0])
-        
+
 #     img6 = im.fromarray(img5) 
 #     img6.save("temp.png")
 
